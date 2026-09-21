@@ -1,39 +1,20 @@
 import torch
 from torch.utils.data import DataLoader
 
-from mnist_dataset import MNISTDataset
-from simple_cnn import SimpleCNN
-
-
+from deeplearning_test.mnist_data import get_train_dataloader, get_test_dataloader, get_test_dataset
+from deeplearning_test.simple_cnn import SimpleCNN
 
 # =========================
 # 1. 准备测试集
 # =========================
 
-train_dataset = MNISTDataset(
-    image_path="../data/MNIST/raw/train-images-idx3-ubyte",
-    label_path="../data/MNIST/raw/train-labels-idx1-ubyte"
-)
-test_dataset = MNISTDataset(
-    image_path="../data/MNIST/raw/t10k-images-idx3-ubyte",
-    label_path="../data/MNIST/raw/t10k-labels-idx1-ubyte"
-)
-
-train_dataloader = DataLoader(
-    train_dataset,
-    batch_size=64,
-    shuffle=False
-)
-test_dataloader = DataLoader(
-    test_dataset,
-    batch_size=64,
-    shuffle=False
-)
+train_dataloader = get_train_dataloader()
+test_dataloader = get_test_dataloader()
 
 model = SimpleCNN()
 # 加载模型参数
 model.load_state_dict(
-    torch.load("mnist_cnn.pth")
+    torch.load("../mnist_cnn.pth")
 )
 # 切换到测试模式
 model.eval()
@@ -79,7 +60,7 @@ accuracy = correct / total
 
 print(f"测试集准确率：{accuracy * 100:.2f}%")
 
-print("测试集数量:", len(test_dataset))
+print("测试集数量:", len(test_dataloader.dataset))
 
 images, labels = next(iter(test_dataloader))
 

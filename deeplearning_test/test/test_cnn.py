@@ -1,25 +1,14 @@
 import torch
 import torch.nn as nn
 
-from mnist_dataset import MNISTDataset
-from torch.utils.data import DataLoader
-from simple_cnn import SimpleCNN
+from deeplearning_test.mnist_data import get_train_dataloader
+from deeplearning_test.simple_cnn import SimpleCNN
 
 # 创建模型
 model = SimpleCNN()
 
 # 训练数据集
-dataset = MNISTDataset(
-    "../data/MNIST/raw/train-images-idx3-ubyte",
-    "../data/MNIST/raw/train-labels-idx1-ubyte"
-)
-
-# DataLoader
-dataloader = DataLoader(
-    dataset,
-    batch_size=64,
-    shuffle=True    # 确保每个epoch训练数据随机打乱（Epoch = 把整个训练集完整训练一遍）
-)
+dataloader = get_train_dataloader()
 images, labels = next(iter(dataloader))
 
 output = model(images)
