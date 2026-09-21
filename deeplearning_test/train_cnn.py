@@ -3,55 +3,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from mnist_dataset import MNISTDataset
+from simple_cnn import SimpleCNN
 
-
-# =========================
-# 1. 定义 CNN
-# =========================
-class SimpleCNN(nn.Module):
-
-    def __init__(self):
-        super().__init__()
-
-        self.conv1 = nn.Conv2d(
-            in_channels=1,
-            out_channels=16,
-            kernel_size=3,
-            padding=1
-        )
-
-        self.conv2 = nn.Conv2d(
-            in_channels=16,
-            out_channels=32,
-            kernel_size=3,
-            padding=1
-        )
-
-        self.pool = nn.MaxPool2d(
-            kernel_size=2,
-            stride=2
-        )
-
-        self.fc = nn.Linear(
-            32 * 7 * 7,
-            10
-        )
-
-    def forward(self, x):
-
-        x = self.conv1(x)
-        x = torch.relu(x)
-        x = self.pool(x)
-
-        x = self.conv2(x)
-        x = torch.relu(x)
-        x = self.pool(x)
-
-        x = x.view(x.size(0), -1)
-
-        x = self.fc(x)
-
-        return x
 
 
 # =========================
@@ -93,11 +46,13 @@ optimizer = torch.optim.SGD(
 # =========================
 # 6. 开始训练
 # =========================
-epochs = 1
+epochs = 5
 
 for epoch in range(epochs):
 
     total_loss = 0
+    correct = 0
+    total = 0
 
     for batch_idx, (images, labels) in enumerate(dataloader):
 
@@ -118,6 +73,11 @@ for epoch in range(epochs):
 
         total_loss += loss.item()
 
+        # 统计准确率
+        predictions = output.argmax(dim=1)   # 得到预测值. tips: 取所有一维最大值，结果为一维数组[64]
+        correct += (predictions == labels).sum().item()
+        total += labels.size(0)
+
         # 每100个 batch 打印一次
         if batch_idx % 100 == 0:
             print(
@@ -126,7 +86,17 @@ for epoch in range(epochs):
                 f"Loss: {loss.item():.4f}"
             )
 
+    # 计算平均 Loss
+    average_loss = total_loss / len(dataloader)
+
+    # 计算准确率
+    accuracy = correct / total
     print(
         f"Epoch {epoch + 1} 完成, "
-        f"平均 Loss: {total_loss / len(dataloader):.4f}"
+        f"平均 Loss: {total_loss / len(dataloader):.4f}, "
+        f"训练准确率: {accuracy * 100:.2f}%"
     )
+
+# 保存模型参数
+torch.save(model.state_dict(), "mnist_cnn.pth")
+print("模型保存完成")
