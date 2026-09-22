@@ -48,6 +48,11 @@ val_accuracy_history = []
 
 best_val_accuracy = 0.0
 
+torch.save(
+    model.state_dict(),
+    "pth/model_epoch_0.pth"
+)
+
 for epoch in range(epochs):
 
     total_loss = 0
@@ -134,13 +139,18 @@ for epoch in range(epochs):
 
         torch.save(
             model.state_dict(),
-            "mnist_cnn.pth"
+            "pth/mnist_cnn.pth"
         )
 
         print(
             f"发现更好的模型，已保存，"
             f"最佳验证集准确率: {best_val_accuracy * 100:.2f}%"
         )
+
+    torch.save(
+        model.state_dict(),
+        f"pth/model_epoch_{epoch + 1}.pth"
+    )
 
     # 切换到训练模式
     model.train()
@@ -152,7 +162,7 @@ print("每个 Epoch 的验证准确率:", val_accuracy_history)
 
 # 加载验证集表现最好的模型
 model.load_state_dict(
-    torch.load("mnist_cnn.pth")
+    torch.load("pth/mnist_cnn.pth")
 )
 
 # 开始推理

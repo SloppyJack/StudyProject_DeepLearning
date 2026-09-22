@@ -14,7 +14,7 @@ test_dataloader = get_test_dataloader()
 model = SimpleCNN()
 # 加载模型参数
 model.load_state_dict(
-    torch.load("../mnist_cnn.pth")
+    torch.load("../pth/mnist_cnn.pth")
 )
 # 切换到测试模式
 model.eval()
