@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 
-from deeplearning_test.mnist_data import get_train_dataloader
-from deeplearning_test.simple_cnn import SimpleCNN
+from cnn_digit_recog.mnist_data import get_train_dataloader
+from cnn_digit_recog.simple_cnn import SimpleCNN
 
 # 创建模型
 model = SimpleCNN()

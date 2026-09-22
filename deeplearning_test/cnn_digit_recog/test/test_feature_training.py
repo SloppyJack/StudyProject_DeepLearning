@@ -1,8 +1,8 @@
 import torch
 import matplotlib.pyplot as plt
 
-from deeplearning_test.simple_cnn import SimpleCNN
-from deeplearning_test.mnist_data import get_test_dataloader
+from cnn_digit_recog.simple_cnn import SimpleCNN
+from cnn_digit_recog.mnist_data import get_test_dataloader
 
 def save_image(arr, name):
     plt.imsave(

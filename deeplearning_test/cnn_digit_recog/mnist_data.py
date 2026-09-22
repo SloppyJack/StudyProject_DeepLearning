@@ -3,9 +3,9 @@ from pathlib import Path
 import torch
 from torch.utils.data import DataLoader, random_split
 
-from deeplearning_test.mnist_dataset import MNISTDataset
+from cnn_digit_recog.mnist_dataset import MNISTDataset
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 MNIST_DIR = BASE_DIR / "data" / "MNIST" / "raw"
 
 # 创建训练集

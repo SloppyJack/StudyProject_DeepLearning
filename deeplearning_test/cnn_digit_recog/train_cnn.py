@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 
-from deeplearning_test.mnist_data import get_train_val_dataloader, get_test_dataloader
+from cnn_digit_recog.mnist_data import get_train_val_dataloader, get_test_dataloader
 from simple_cnn import SimpleCNN
 
 
