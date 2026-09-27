@@ -75,7 +75,6 @@ for epoch in range(epochs):
 
     test_loss = test_loss / len(test_dataloader)
     test_accuracy = test_correct / test_total
-    print(len(test_dataloader), test_total)
 
     # 保存最佳模型
     if test_accuracy > best_accuracy:
