@@ -19,7 +19,7 @@ optimizer = optim.Adam(
     lr=0.001
 )
 
-epochs = 5
+epochs = 15
 
 best_accuracy = 0.0
 

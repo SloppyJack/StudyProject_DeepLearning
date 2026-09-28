@@ -6,7 +6,10 @@ from torchvision import transforms
 
 
 train_transform = transforms.Compose([
-    transforms.ToTensor(),
+    transforms.RandomCrop(32, padding=4),   # 32x32 -> 40x40，随机剪裁成32x32
+    transforms.RandomHorizontalFlip(p=0.5), # 读取一张图片，50%概率水平翻转
+
+    transforms.ToTensor(),  # 将原始图片转换成3x32x32，便于后面交给CNN训练。此外还将像素值转为0~1
     transforms.Normalize(
         mean=(0.4914, 0.4822, 0.4465),
         std=(0.2470, 0.2435, 0.2616)
