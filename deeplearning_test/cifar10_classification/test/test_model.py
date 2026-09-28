@@ -17,6 +17,8 @@ model = SimpleCNN()
 
 print("model:")
 print(model)
+print('weight.shape: ', model.conv3.weight.shape)
+print('bias.shape: ', model.conv3.bias.shape)
 
 
 # 4. 前向传播

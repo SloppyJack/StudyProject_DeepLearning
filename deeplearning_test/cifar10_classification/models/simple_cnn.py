@@ -1,6 +1,10 @@
 import torch
 from torch import nn
 
+# 卷积层相关参数：
+#
+# weight.shape = out_channels x in_channels x kernel_h x kernel_w
+# bais.shap = out_channels
 
 class SimpleCNN(nn.Module):
     def __init__(self):
@@ -23,11 +27,21 @@ class SimpleCNN(nn.Module):
             padding=1
         )
 
+        # 第三层卷积CNN：32x8x8 -> 64x8x8
+        # tips: weight为64x32x3x3，bias一个通道一个bias即64个bias
+        self.conv3 = nn.Conv2d(
+            in_channels=32,
+            out_channels=64,
+            kernel_size=3,
+            stride=1,
+            padding=1
+        )
+
         # 最大池化
         self.pool = nn.MaxPool2d(2, 2)
 
         #
-        self.fc = nn.Linear(32 * 8 * 8, 10)
+        self.fc = nn.Linear(64 * 4 * 4, 10)
 
     # x: 参数通常是一批照片, [64, 3, 32, 32]
     def forward(self, x):
@@ -40,6 +54,11 @@ class SimpleCNN(nn.Module):
         x = self.conv2(x)   # 16x16x16 -> 32x16x16
         x = torch.relu(x)
         x = self.pool(x)    # 32x16x16 -> 32x8x8
+
+        # 3: 卷积 -> relu激活 -> 池化
+        x = self.conv3(x)  # 32x8x8 -> 64x8x8
+        x = torch.relu(x)
+        x = self.pool(x)  # 64x8x8 -> 64x4x4
 
         # 展平
         x = x.view(x.size(0), -1)
