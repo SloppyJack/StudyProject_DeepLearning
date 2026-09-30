@@ -18,6 +18,10 @@ model.load_state_dict(state_dict)
 
 print(state_dict.keys())
 
+print(state_dict["bn1.running_mean"])
+print(state_dict["bn1.running_var"])
+print(state_dict["bn1.num_batches_tracked"])
+
 
 # 切换到测试模式
 model.eval()

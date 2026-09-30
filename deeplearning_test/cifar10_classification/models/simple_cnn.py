@@ -37,6 +37,13 @@ class SimpleCNN(nn.Module):
             padding=1
         )
 
+        # BatchNorm2d：处理CNN内部的特征图。每个outChannel都会计算均值和方差，并且有γ和β两个可学习值
+        # y = γX + β, γ为weight，β为bias
+        # 此外，batchNorm2d中会维护batch_mean、batch_var用于训练，running_mean、running_var用于推理
+        self.bn1 = nn.BatchNorm2d(16)
+        self.bn2 = nn.BatchNorm2d(32)
+        self.bn3 = nn.BatchNorm2d(64)
+
         # 最大池化
         self.pool = nn.MaxPool2d(2, 2)
 
@@ -47,16 +54,19 @@ class SimpleCNN(nn.Module):
     def forward(self, x):
         # 1: 卷积 -> relu激活 -> 池化
         x = self.conv1(x)   # 3x32x32 -> 16x32x32
+        x = self.bn1(x)
         x = torch.relu(x)
         x = self.pool(x)    # 16x32x32 -> 16x16x16
 
         # 2: 卷积 -> relu激活 -> 池化
         x = self.conv2(x)   # 16x16x16 -> 32x16x16
+        x = self.bn2(x)
         x = torch.relu(x)
         x = self.pool(x)    # 32x16x16 -> 32x8x8
 
         # 3: 卷积 -> relu激活 -> 池化
         x = self.conv3(x)  # 32x8x8 -> 64x8x8
+        x = self.bn3(x)
         x = torch.relu(x)
         x = self.pool(x)  # 64x8x8 -> 64x4x4
 

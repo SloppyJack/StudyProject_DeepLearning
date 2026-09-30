@@ -15,6 +15,9 @@ print("labels shape:", labels.shape)
 # 3. 创建 CNN 模型
 model = SimpleCNN()
 
+for key, value in model.state_dict().items():
+    print(key, value.shape)
+
 print("model:")
 print(model)
 print('weight.shape: ', model.conv3.weight.shape)
