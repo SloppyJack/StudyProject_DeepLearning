@@ -18,6 +18,12 @@ model = SimpleCNN()
 for key, value in model.state_dict().items():
     print(key, value.shape)
 
+print("====== model.parameters() ======")
+
+for name, parameter in model.named_parameters():
+    print(name)
+
+
 print("model:")
 print(model)
 print('weight.shape: ', model.conv3.weight.shape)

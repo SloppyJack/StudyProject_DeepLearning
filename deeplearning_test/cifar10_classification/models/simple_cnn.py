@@ -47,8 +47,11 @@ class SimpleCNN(nn.Module):
         # 最大池化
         self.pool = nn.MaxPool2d(2, 2)
 
-        #
+        # 全连接
         self.fc = nn.Linear(64 * 4 * 4, 10)
+
+        # dropout
+        self.dropout = nn.Dropout(p=0.5)
 
     # x: 参数通常是一批照片, [64, 3, 32, 32]
     def forward(self, x):
@@ -73,6 +76,8 @@ class SimpleCNN(nn.Module):
         # 展平
         x = x.view(x.size(0), -1)
 
+        # dropout，随机丢弃特征
+        x = self.dropout(x)
         # 全连接
         x = self.fc(x)
 
