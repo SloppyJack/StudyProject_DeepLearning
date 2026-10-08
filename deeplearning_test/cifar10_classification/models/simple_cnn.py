@@ -51,7 +51,7 @@ class SimpleCNN(nn.Module):
         self.fc = nn.Linear(64 * 4 * 4, 10)
 
         # dropout
-        self.dropout = nn.Dropout(p=0.5)
+        self.dropout = nn.Dropout(p=0.3)
 
     # x: 参数通常是一批照片, [64, 3, 32, 32]
     def forward(self, x):

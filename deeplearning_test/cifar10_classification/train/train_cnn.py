@@ -19,11 +19,20 @@ optimizer = optim.Adam(
     lr=0.001
 )
 
+scheduler = optim.lr_scheduler.StepLR(
+    optimizer,
+    step_size=5,
+    gamma=0.5
+)
+
 epochs = 15
 
 best_accuracy = 0.0
 
 for epoch in range(epochs):
+    # 记录当前 epoch 使用的学习率
+    current_lr = optimizer.param_groups[0]["lr"]
+
     # 训练模型
     model.train()
 
@@ -97,3 +106,7 @@ for epoch in range(epochs):
         f"Test Loss: {test_loss:.4f} "
         f"Test Acc: {test_accuracy * 100:.2f}%"
     )
+
+    print(f"Epoch [{epoch + 1}/{epochs}], lr={current_lr:.6f}")
+    # 每个 epoch 结束后更新学习率
+    scheduler.step()
