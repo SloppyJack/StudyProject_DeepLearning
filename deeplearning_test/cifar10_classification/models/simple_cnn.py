@@ -40,6 +40,7 @@ class SimpleCNN(nn.Module):
         # BatchNorm2d：处理CNN内部的特征图。每个outChannel都会计算均值和方差，并且有γ和β两个可学习值
         # y = γX + β, γ为weight，β为bias
         # 此外，batchNorm2d中会维护batch_mean、batch_var用于训练，running_mean、running_var用于推理
+        # γ和β只有在反向传播或优化器更新后，才可能改变
         self.bn1 = nn.BatchNorm2d(16)
         self.bn2 = nn.BatchNorm2d(32)
         self.bn3 = nn.BatchNorm2d(64)

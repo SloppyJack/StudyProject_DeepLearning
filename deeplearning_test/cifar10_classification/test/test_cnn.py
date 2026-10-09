@@ -1,4 +1,5 @@
 import torch
+from torch import nn
 
 from datasets.cifar10_dataset import get_test_dataloader
 from models.simple_cnn import SimpleCNN
@@ -6,7 +7,7 @@ from models.simple_cnn import SimpleCNN
 
 # 获取测试数据
 test_dataloader = get_test_dataloader()
-
+criterion = nn.CrossEntropyLoss()
 
 # 创建模型
 model = SimpleCNN()
@@ -16,40 +17,27 @@ model = SimpleCNN()
 state_dict = torch.load("../outputs/checkpoints/best_model.pth", weights_only=True)
 model.load_state_dict(state_dict)
 
-print(state_dict.keys())
-
-print(state_dict["bn1.running_mean"])
-print(state_dict["bn1.running_var"])
-print(state_dict["bn1.num_batches_tracked"])
-
 
 # 切换到测试模式
 model.eval()
 
-
-correct = 0
-total = 0
-
+test_loss_sum = 0.0
+test_correct = 0
+test_total = 0
 
 with torch.no_grad():
-
     for images, labels in test_dataloader:
+        output = model(images)
+        loss = criterion(output, labels)
 
-        # 前向传播
-        outputs = model(images)
+        test_loss_sum += loss.item() * labels.size(0)
 
-        # 获取预测类别
-        predicted = outputs.argmax(dim=1)
+        predicted = output.argmax(dim=1)
+        test_correct += (predicted == labels).sum().item()
+        test_total += labels.size(0)
 
-        # 样本总数
-        total += labels.size(0)
+test_loss = test_loss_sum / test_total
+test_accuracy = test_correct / test_total
 
-        # 预测正确数量
-        correct += (predicted == labels).sum().item()
-
-
-accuracy = correct / total
-
-print("测试图片数量：", total)
-print("预测正确数量：", correct)
-print(f"测试准确率：{accuracy * 100:.2f}%")
+print(f"最终 Test Loss: {test_loss:.4f}")
+print(f"最终 Test Accuracy: {test_accuracy:.2%}")

@@ -1,8 +1,18 @@
-from torch.utils.data import DataLoader
+import torch
+from torch.utils.data import DataLoader, Subset
 from torchvision.datasets import CIFAR10
 from torchvision import transforms
 
-# 训练集随机打乱，测试集不打乱
+
+
+# 只生成一次随机索引
+indices = torch.randperm(
+    50000,
+    generator=torch.Generator().manual_seed(42)
+).tolist()
+
+train_indices = indices[:45000]
+val_indices = indices[45000:]
 
 
 train_transform = transforms.Compose([
@@ -24,16 +34,22 @@ test_transform = transforms.Compose([
     )
 ])
 
-def get_train_dataset():
-    train_dataset = CIFAR10(
+def _get_full_train_dataset(transform):
+    return CIFAR10(
         root="../data",
         train=True,
         download=True,
-        transform=train_transform   # transform PIL Image to tensor, and 0~255 pixel to 0~1.0
-
+        transform=transform
     )
 
-    return train_dataset
+# 训练集随机打乱，测试集不打乱
+def get_train_dataset():
+    dataset = _get_full_train_dataset(train_transform)
+    return Subset(dataset, train_indices)
+
+def get_val_dataset():
+    dataset = _get_full_train_dataset(test_transform)
+    return Subset(dataset, val_indices)
 
 def get_test_dataset():
     test_dataset = CIFAR10(
@@ -55,6 +71,15 @@ def get_train_dataloader():
     )
 
     return train_dataloader
+
+def get_val_dataloader():
+    val_dataset = get_val_dataset()
+
+    return DataLoader(
+        dataset=val_dataset,
+        batch_size=64,
+        shuffle=False
+    )
 
 def get_test_dataloader():
     test_dataset = get_test_dataset()
