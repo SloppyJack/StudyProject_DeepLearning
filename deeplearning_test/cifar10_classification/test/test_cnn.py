@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+from datasets.cifar10_classes import NUM_CLASSES, CIFAR10_CLASSES
 from datasets.cifar10_dataset import get_test_dataloader
 from models.simple_cnn import SimpleCNN
 
@@ -25,6 +26,9 @@ test_loss_sum = 0.0
 test_correct = 0
 test_total = 0
 
+class_correct = [0] * NUM_CLASSES
+class_total = [0] * NUM_CLASSES
+
 with torch.no_grad():
     for images, labels in test_dataloader:
         output = model(images)
@@ -36,6 +40,16 @@ with torch.no_grad():
         test_correct += (predicted == labels).sum().item()
         test_total += labels.size(0)
 
+        for i in range(labels.size(0)):
+            label = labels[i].item()
+            class_total[label] += 1
+            if predicted[i].item() == label:
+                class_correct[label] += 1
+
+for class_id, class_name in CIFAR10_CLASSES.items():
+    accuracy = class_correct[class_id] / class_total[class_id]
+
+    print(f"{class_name}: {accuracy * 100:.2f}%")
 test_loss = test_loss_sum / test_total
 test_accuracy = test_correct / test_total
 
