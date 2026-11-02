@@ -12,4 +12,4 @@ CIFAR10_CLASSES = {
     9: "truck"
 }
 
-NUM_CLASSES = len(CIFAR10_CLASSES)
+num_classes = len(CIFAR10_CLASSES)

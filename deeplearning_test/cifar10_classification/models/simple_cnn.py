@@ -7,7 +7,7 @@ from torch import nn
 # bais.shap = out_channels
 
 class SimpleCNN(nn.Module):
-    def __init__(self):
+    def __init__(self, num_classes=10):
         super().__init__()
 
         # 第一层卷积CNN：3x32x32 -> 16x32x32
@@ -49,7 +49,7 @@ class SimpleCNN(nn.Module):
         self.pool = nn.MaxPool2d(2, 2)
 
         # 全连接
-        self.fc = nn.Linear(64 * 4 * 4, 10)
+        self.fc = nn.Linear(64 * 4 * 4, num_classes)
 
         # dropout
         self.dropout = nn.Dropout(p=0.3)

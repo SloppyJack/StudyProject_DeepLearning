@@ -1,8 +1,10 @@
 import torch
 from torch import nn
 
-from datasets.cifar10_classes import NUM_CLASSES, CIFAR10_CLASSES
+from datasets.cifar10_classes import CIFAR10_CLASSES
 from datasets.cifar10_dataset import get_test_dataloader
+from experiment_config import MODEL_NAME, DEVICE, CHECKPOINT_DIR, NUM_CLASSES
+from models.resnet18 import ResNet18
 from models.simple_cnn import SimpleCNN
 
 
@@ -10,14 +12,26 @@ from models.simple_cnn import SimpleCNN
 test_dataloader = get_test_dataloader()
 criterion = nn.CrossEntropyLoss()
 
-# 创建模型
-model = SimpleCNN()
+# 模型配置
+MODEL_CONFIG = {
+    "simple_cnn": SimpleCNN,
+    "resnet18": ResNet18
+}
+if MODEL_NAME not in MODEL_CONFIG:
+    raise ValueError(f"不支持的模型名称: {MODEL_NAME}")
 
+# 创建模型
+model = MODEL_CONFIG[MODEL_NAME](num_classes=NUM_CLASSES)
+model = model.to(DEVICE)
 
 # 加载训练好的参数
-state_dict = torch.load("../outputs/checkpoints/best_model.pth", weights_only=True)
+BEST_MODEL_PATH = CHECKPOINT_DIR / f"{MODEL_NAME}_best.pth"
+state_dict = torch.load(BEST_MODEL_PATH, map_location=DEVICE,weights_only=True)
 model.load_state_dict(state_dict)
 
+print(f"当前测试模型：{MODEL_NAME}")
+print(f"加载权重：{BEST_MODEL_PATH}")
+print(f"模型参数量：{sum(p.numel() for p in model.parameters()):,}")
 
 # 切换到测试模式
 model.eval()
@@ -31,6 +45,8 @@ class_total = [0] * NUM_CLASSES
 
 with torch.no_grad():
     for images, labels in test_dataloader:
+        images = images.to(DEVICE)
+        labels = labels.to(DEVICE)
         output = model(images)
         loss = criterion(output, labels)
 

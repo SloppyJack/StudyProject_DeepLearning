@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader, Subset
 from torchvision.datasets import CIFAR10
 from torchvision import transforms
 
-
+from experiment_config import DATA_DIR, BATCH_SIZE
 
 # 只生成一次随机索引
 indices = torch.randperm(
@@ -36,7 +36,7 @@ test_transform = transforms.Compose([
 
 def _get_full_train_dataset(transform):
     return CIFAR10(
-        root="../data",
+        root=str(DATA_DIR),
         train=True,
         download=True,
         transform=transform
@@ -53,7 +53,7 @@ def get_val_dataset():
 
 def get_test_dataset():
     test_dataset = CIFAR10(
-        root="../data",
+        root=str(DATA_DIR),
         train=False,
         download=True,
         transform=test_transform
@@ -66,7 +66,7 @@ def get_train_dataloader():
 
     train_dataloader = DataLoader(
         dataset=train_dataset,
-        batch_size=64,
+        batch_size=BATCH_SIZE,
         shuffle=True    # 随机打乱
     )
 
@@ -77,7 +77,7 @@ def get_val_dataloader():
 
     return DataLoader(
         dataset=val_dataset,
-        batch_size=64,
+        batch_size=BATCH_SIZE,
         shuffle=False
     )
 
@@ -86,7 +86,7 @@ def get_test_dataloader():
 
     test_dataloader = DataLoader(
         dataset=test_dataset,
-        batch_size=64,
+        batch_size=BATCH_SIZE,
         shuffle=False
     )
 
