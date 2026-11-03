@@ -4,7 +4,7 @@ import torch
 from torchvision.utils import save_image, make_grid
 
 from datasets.cifar10_dataset import get_test_dataloader
-from experiment_config import MODEL_NAME, DEVICE, CHECKPOINT_DIR, OUTPUT_DIR, NUM_CLASSES
+from experiment_config import MODEL_NAME, DEVICE, CHECKPOINT_DIR, OUTPUT_DIR, NUM_CLASSES, CIFAR10_STD, CIFAR10_MEAN
 from models.resnet18 import ResNet18
 from models.simple_cnn import SimpleCNN
 
@@ -51,8 +51,8 @@ images, labels = next(iter(test_dataloader))
 image = images[0]
 
 # 将标准化后的图片恢复为正常颜色
-mean = torch.tensor([0.4914, 0.4822, 0.4465]).view(3, 1, 1)
-std = torch.tensor([0.2470, 0.2435, 0.2616]).view(3, 1, 1)
+mean = torch.tensor(CIFAR10_MEAN).view(3, 1, 1)
+std = torch.tensor(CIFAR10_STD).view(3, 1, 1)
 
 original_image = image.cpu() * std + mean
 original_image = original_image.clamp(0, 1)

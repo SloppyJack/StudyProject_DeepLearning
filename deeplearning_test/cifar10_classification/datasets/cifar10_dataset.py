@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader, Subset
 from torchvision.datasets import CIFAR10
 from torchvision import transforms
 
-from experiment_config import DATA_DIR, BATCH_SIZE
+from experiment_config import DATA_DIR, BATCH_SIZE, CIFAR10_MEAN, CIFAR10_STD
 
 # 只生成一次随机索引
 indices = torch.randperm(
@@ -21,16 +21,16 @@ train_transform = transforms.Compose([
 
     transforms.ToTensor(),  # 将原始图片转换成3x32x32，便于后面交给CNN训练。此外还将像素值转为0~1
     transforms.Normalize(
-        mean=(0.4914, 0.4822, 0.4465),
-        std=(0.2470, 0.2435, 0.2616)
+        mean=CIFAR10_MEAN,
+        std=CIFAR10_STD
     )
 ])
 
 test_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(
-        mean=(0.4914, 0.4822, 0.4465),
-        std=(0.2470, 0.2435, 0.2616)
+        mean=CIFAR10_MEAN,
+        std=CIFAR10_STD
     )
 ])
 

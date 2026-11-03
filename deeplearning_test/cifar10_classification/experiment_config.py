@@ -22,6 +22,10 @@ CHECKPOINT_DIR = OUTPUT_DIR / "checkpoints"
 # 可视化图片保存路径
 FIGURE_DIR = OUTPUT_DIR / "figures"
 
+# CIFAR10数据源均值和方差
+CIFAR10_MEAN = (0.4914, 0.4822, 0.4465)
+CIFAR10_STD = (0.2470, 0.2435, 0.2616)
+
 
 # ================= 模型配置 =================
 
