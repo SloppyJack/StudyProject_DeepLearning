@@ -9,6 +9,8 @@ from experiment_config import NUM_CLASSES, CHECKPOINT_DIR, DEVICE, MODEL_NAME, L
     GAMMA, EPOCHS, PATIENCE, BATCH_SIZE, SCHEDULER_T_MAX, SCHEDULER_ETA_MIN
 from models.resnet18 import ResNet18
 from models.simple_cnn import SimpleCNN
+from experiment_config import USE_MIXUP, MIXUP_ALPHA
+from utils.mixup import mixup_batch
 
 BEST_MODEL_PATH = CHECKPOINT_DIR / f"{MODEL_NAME}_best.pth"
 
@@ -72,10 +74,13 @@ for epoch in range(epochs):
     for batch_idx, (images, labels) in enumerate(train_dataloader):
         images = images.to(DEVICE, memory_format=torch.channels_last)
         labels = labels.to(DEVICE)
+        labels_a, labels_b, lam = labels, labels, 1.0
+        if USE_MIXUP:
+            images, labels_a, labels_b, lam = mixup_batch(images, labels, MIXUP_ALPHA)
         # 前向传播
         output = model(images)
         # 计算 Loss
-        loss = criterion(output, labels)
+        loss = lam * criterion(output, labels_a) + (1 - lam) * criterion(output, labels_b)
         # 清空旧梯度
         optimizer.zero_grad()
         # 反向传播
@@ -89,7 +94,10 @@ for epoch in range(epochs):
         # 统计准确率
         predicted = output.argmax(dim=1)
         train_total += labels.size(0)
-        train_correct += (predicted == labels).sum().item()
+        train_correct += (
+            lam * (predicted == labels_a).sum().item()
+            + (1 - lam) * (predicted == labels_b).sum().item()
+        )
 
     train_time = time.perf_counter() - train_start
     train_loss = train_total_loss / train_total
