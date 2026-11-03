@@ -6,7 +6,7 @@ from torch import optim
 
 from datasets.cifar10_dataset import get_train_dataloader, get_val_dataloader
 from experiment_config import NUM_CLASSES, CHECKPOINT_DIR, DEVICE, MODEL_NAME, LEARNING_RATE, WEIGHT_DECAY, STEP_SIZE, \
-    GAMMA, EPOCHS, PATIENCE, BATCH_SIZE
+    GAMMA, EPOCHS, PATIENCE, BATCH_SIZE, SCHEDULER_T_MAX, SCHEDULER_ETA_MIN
 from models.resnet18 import ResNet18
 from models.simple_cnn import SimpleCNN
 
@@ -44,10 +44,10 @@ optimizer = optim.Adam(
     foreach=True
 )
 
-scheduler = optim.lr_scheduler.StepLR(
+scheduler = optim.lr_scheduler.CosineAnnealingLR(
     optimizer,
-    step_size=STEP_SIZE,
-    gamma=GAMMA
+    T_max=SCHEDULER_T_MAX,
+    eta_min=SCHEDULER_ETA_MIN
 )
 
 epochs = EPOCHS

@@ -44,6 +44,9 @@ LEARNING_RATE = 0.001
 
 WEIGHT_DECAY = 0.0
 
+SCHEDULER_T_MAX = 15
+SCHEDULER_ETA_MIN = 1e-6
+
 
 # ================= 学习率调度 =================
 
