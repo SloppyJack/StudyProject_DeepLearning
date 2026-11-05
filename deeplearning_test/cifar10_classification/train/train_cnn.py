@@ -13,6 +13,7 @@ from experiment_config import USE_MIXUP, MIXUP_ALPHA
 from utils.mixup import mixup_batch
 from experiment_config import USE_CATDOG_AUX, CATDOG_AUX_WEIGHT
 from utils.catdog_aux import catdog_aux_loss
+from experiment_config import ONECYCLE_PCT_START, ONECYCLE_DIV_FACTOR, ONECYCLE_FINAL_DIV_FACTOR
 
 BEST_MODEL_PATH = CHECKPOINT_DIR / f"{MODEL_NAME}_best.pth"
 
@@ -57,10 +58,15 @@ optimizer = optim.Adam(
     foreach=True
 )
 
-scheduler = optim.lr_scheduler.CosineAnnealingLR(
+scheduler = optim.lr_scheduler.OneCycleLR(
     optimizer,
-    T_max=SCHEDULER_T_MAX,
-    eta_min=SCHEDULER_ETA_MIN
+    max_lr=LEARNING_RATE,
+    epochs=EPOCHS,
+    steps_per_epoch=len(train_dataloader),
+    pct_start=ONECYCLE_PCT_START,
+    div_factor=ONECYCLE_DIV_FACTOR,
+    final_div_factor=ONECYCLE_FINAL_DIV_FACTOR,
+    cycle_momentum=False
 )
 
 epochs = EPOCHS
@@ -107,6 +113,7 @@ for epoch in range(epochs):
         loss.backward()
         # 更新参数
         optimizer.step()
+        scheduler.step()
 
         # 统计total_loss
         train_total_loss += loss.item() * labels.size(0)
@@ -182,8 +189,7 @@ for epoch in range(epochs):
         print("Early Stopping!")
         break
 
-    # 每个 epoch 结束后更新学习率
-    scheduler.step()
+    # OneCycleLR 在每次参数更新后调整学习率。
     epoch_time = time.perf_counter() - epoch_start
     print(f"训练耗时：{train_time:.2f} 秒")
     print(f"验证耗时：{val_time:.2f} 秒")
