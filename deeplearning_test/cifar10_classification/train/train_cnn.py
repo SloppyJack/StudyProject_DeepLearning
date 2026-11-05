@@ -9,7 +9,7 @@ from experiment_config import NUM_CLASSES, CHECKPOINT_DIR, DEVICE, MODEL_NAME, L
     GAMMA, EPOCHS, PATIENCE, BATCH_SIZE, SCHEDULER_T_MAX, SCHEDULER_ETA_MIN
 from models.resnet18 import ResNet18
 from models.simple_cnn import SimpleCNN
-from experiment_config import USE_MIXUP, MIXUP_ALPHA
+from experiment_config import USE_MIXUP, MIXUP_ALPHA, MIXUP_EPOCHS
 from utils.mixup import mixup_batch
 from experiment_config import USE_CATDOG_AUX, CATDOG_AUX_WEIGHT
 from utils.catdog_aux import catdog_aux_loss
@@ -93,7 +93,7 @@ for epoch in range(epochs):
         images = images.to(DEVICE, memory_format=torch.channels_last)
         labels = labels.to(DEVICE)
         labels_a, labels_b, lam = labels, labels, 1.0
-        if USE_MIXUP:
+        if USE_MIXUP and epoch < MIXUP_EPOCHS:
             images, labels_a, labels_b, lam = mixup_batch(images, labels, MIXUP_ALPHA)
         # 前向传播
         if aux_head is not None:
