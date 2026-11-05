@@ -11,6 +11,8 @@ from models.resnet18 import ResNet18
 from models.simple_cnn import SimpleCNN
 from experiment_config import USE_MIXUP, MIXUP_ALPHA
 from utils.mixup import mixup_batch
+from experiment_config import USE_CATDOG_AUX, CATDOG_AUX_WEIGHT
+from utils.catdog_aux import catdog_aux_loss
 
 BEST_MODEL_PATH = CHECKPOINT_DIR / f"{MODEL_NAME}_best.pth"
 
@@ -29,6 +31,15 @@ if MODEL_NAME not in MODEL_CONFIG:
 model = MODEL_CONFIG[MODEL_NAME](num_classes=NUM_CLASSES)
 model = model.to(DEVICE, memory_format=torch.channels_last)
 
+# Training-only auxiliary head; the saved ten-class model remains compatible.
+aux_head = None
+parameters = list(model.parameters())
+if USE_CATDOG_AUX:
+    if MODEL_NAME != "resnet18":
+        raise ValueError("Cat/dog auxiliary task currently requires ResNet18")
+    aux_head = nn.Linear(model.fc.in_features, 2).to(DEVICE)
+    parameters += list(aux_head.parameters())
+
 print(f"当前模型：{MODEL_NAME}")
 print(f"运行设备：{DEVICE}")
 print(f"训练轮数：{EPOCHS}")
@@ -40,7 +51,7 @@ criterion = nn.CrossEntropyLoss()
 
 # 优化器
 optimizer = optim.Adam(
-    model.parameters(),
+    parameters,
     lr=LEARNING_RATE,
     weight_decay=WEIGHT_DECAY,
     foreach=True
@@ -70,6 +81,7 @@ for epoch in range(epochs):
     train_total_loss = 0.0
     train_correct = 0
     train_total = 0
+    aux_loss_sum = 0.0
 
     for batch_idx, (images, labels) in enumerate(train_dataloader):
         images = images.to(DEVICE, memory_format=torch.channels_last)
@@ -78,9 +90,17 @@ for epoch in range(epochs):
         if USE_MIXUP:
             images, labels_a, labels_b, lam = mixup_batch(images, labels, MIXUP_ALPHA)
         # 前向传播
-        output = model(images)
+        if aux_head is not None:
+            features = model.forward_features(images)
+            output = model.fc(features)
+        else:
+            output = model(images)
         # 计算 Loss
         loss = lam * criterion(output, labels_a) + (1 - lam) * criterion(output, labels_b)
+        if aux_head is not None:
+            auxiliary_loss = catdog_aux_loss(aux_head(features), labels_a, labels_b, lam)
+            loss = loss + CATDOG_AUX_WEIGHT * auxiliary_loss
+            aux_loss_sum += auxiliary_loss.item() * labels.size(0)
         # 清空旧梯度
         optimizer.zero_grad()
         # 反向传播
@@ -135,6 +155,8 @@ for epoch in range(epochs):
         counter = 0
 
         torch.save(model.state_dict(),BEST_MODEL_PATH)
+        if aux_head is not None:
+            torch.save(aux_head.state_dict(), CHECKPOINT_DIR / f"{MODEL_NAME}_catdog_aux.pth")
 
         print(
             f"保存最佳模型，"
@@ -153,6 +175,8 @@ for epoch in range(epochs):
     )
 
     print(f"Epoch [{epoch + 1}/{epochs}], lr={current_lr:.6f}")
+    if aux_head is not None:
+        print(f"Aux Loss (batch mean): {aux_loss_sum / train_total:.6f}")
 
     if counter >= patience:
         print("Early Stopping!")

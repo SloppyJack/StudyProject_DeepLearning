@@ -111,7 +111,7 @@ class ResNet18(nn.Module):
         # nn.Sequential()用于组合多个残差层
         return nn.Sequential(*layers)
 
-    def forward(self, x):
+    def forward_features(self, x):
         x = self.relu(self.bn1(self.conv1(x)))
 
         x = self.layer1(x)
@@ -121,9 +121,10 @@ class ResNet18(nn.Module):
 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        x = self.fc(x)
-
         return x
+
+    def forward(self, x):
+        return self.fc(self.forward_features(x))
 
 if __name__ == "__main__":
     model = ResNet18(num_classes=10)
