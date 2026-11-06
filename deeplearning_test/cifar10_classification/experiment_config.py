@@ -33,8 +33,8 @@ MODEL_NAME = "resnet18"
 
 NUM_CLASSES = num_classes
 
-# 96像素是CPU预算下的输入适配，不会为32像素原图增加细节。
-INPUT_SIZE = 96
+# 输入尺度适配预训练主干；插值不会为32像素原图增加细节。
+INPUT_SIZE = 128
 PRETRAINED_WEIGHTS = BASE_DIR / "outputs/pretrained/resnet18-f37072fd.pth"
 BACKBONE_LEARNING_RATE = 0.0001
 
