@@ -112,6 +112,7 @@ class ResNet18(nn.Module):
         return nn.Sequential(*layers)
 
     def forward_features(self, x):
+        """提取主分类器特征，供前向传播和只读可视化复用，不包含辅助头。"""
         x = self.relu(self.bn1(self.conv1(x)))
 
         x = self.layer1(x)
