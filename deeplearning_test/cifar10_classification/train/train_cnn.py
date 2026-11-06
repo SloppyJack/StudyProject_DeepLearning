@@ -11,6 +11,7 @@ from models.resnet18 import ResNet18
 from models.simple_cnn import SimpleCNN
 from experiment_config import USE_MIXUP, MIXUP_ALPHA, MIXUP_EPOCHS
 from utils.mixup import mixup_batch
+from experiment_config import PRETRAINED_WEIGHTS, BACKBONE_LEARNING_RATE
 from experiment_config import ONECYCLE_PCT_START, ONECYCLE_DIV_FACTOR, ONECYCLE_FINAL_DIV_FACTOR
 
 BEST_MODEL_PATH = CHECKPOINT_DIR / f"{MODEL_NAME}_best.pth"
@@ -27,7 +28,10 @@ if MODEL_NAME not in MODEL_CONFIG:
     raise ValueError(f"不支持的模型名称: {MODEL_NAME}")
 
 # 创建模型
-model = MODEL_CONFIG[MODEL_NAME](num_classes=NUM_CLASSES)
+if MODEL_NAME == "resnet18":
+    model = ResNet18(num_classes=NUM_CLASSES, pretrained=True, weights_path=PRETRAINED_WEIGHTS)
+else:
+    raise ValueError("本轮迁移学习实验仅支持resnet18")
 model = model.to(DEVICE, memory_format=torch.channels_last)
 
 print(f"当前模型：{MODEL_NAME}")
@@ -39,9 +43,13 @@ print(f"Batch Size：{BATCH_SIZE}")
 # 损失函数
 criterion = nn.CrossEntropyLoss()
 
-# 优化器
+# 骨干小学习率保护预训练特征；新分类层使用原学习率。
+parameter_groups = [
+    {"params": [p for n, p in model.named_parameters() if not n.startswith("fc.")], "lr": BACKBONE_LEARNING_RATE},
+    {"params": model.fc.parameters(), "lr": LEARNING_RATE},
+]
 optimizer = optim.Adam(
-    model.parameters(),
+    parameter_groups,
     lr=LEARNING_RATE,
     weight_decay=WEIGHT_DECAY,
     foreach=True
@@ -49,7 +57,7 @@ optimizer = optim.Adam(
 
 scheduler = optim.lr_scheduler.OneCycleLR(
     optimizer,
-    max_lr=LEARNING_RATE,
+    max_lr=[BACKBONE_LEARNING_RATE, LEARNING_RATE],
     epochs=EPOCHS,
     steps_per_epoch=len(train_dataloader),
     pct_start=ONECYCLE_PCT_START,
@@ -135,7 +143,7 @@ for epoch in range(epochs):
     val_loss = val_loss_sum / val_total
     val_accuracy = val_correct / val_total
 
-    # 仅保存主模型；历史主权重结构不变，仍可严格加载。
+    # 仅保存当前标准ResNet主模型；旧CIFAR主干权重须配套旧源码读取。
     if val_loss < best_val_loss:
         best_val_loss = val_loss
         counter = 0
